@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app">
+    <input type="text" v-model="inp" @keyup.enter="add">
+
+    <ul>
+        <li v-for="(item,index) in arr">
+            名称: {{item}}
+            <button @click="remove(index)">删除</button>
+        </li>
+    </ul>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    let vm = new Vue({
+        el: "#app",
+        data:{
+            inp: "",
+            arr:[]
+        },
+        methods:{
+            //添加
+            add(){
+                this.arr.push(this.inp);
+                this.inp = '';
+            },
+
+            //删除
+            remove(index){
+                this.arr.splice(index, 1);
+            }
+        },
+    })
+
+
+</script>
+</body>
+</html>

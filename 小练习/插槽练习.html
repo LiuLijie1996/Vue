@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        .panel {
+            width: 800px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <panel v-for="item in articles" :bgc="item.bgc">
+        <h3 slot="title">{{item.title}}</h3>
+        <div slot="content">{{item.content}}</div>
+        <div slot="author">作者: {{item.author||'默认作者'}}</div>
+        <div slot="pageView">
+            <button type="button" class="btn btn-primary" @click="fn(item)">查看作者</button>
+        </div>
+    </panel>
+</div>
+
+<template id="panel">
+    <div>
+        <div class="panel" :style="borderColor">
+            <div class="panel-heading" :style="bgColor">
+                <slot name="title"></slot>
+            </div>
+            <div class="panel-body">
+                <slot name="content"></slot>
+            </div>
+            <div class="panel-footer">
+                <slot name="author"></slot>
+            </div>
+            <div class="panel-footer">
+                <slot name="pageView"></slot>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+
+    let panel = {
+        props: ['bgc'],
+        template: "#panel",
+        data() {
+            return {
+                r: Math.floor(Math.random() * 255),
+                g: Math.floor(Math.random() * 255),
+                b: Math.floor(Math.random() * 255),
+                a: 0.1 + Math.random() * 1,
+            }
+        },
+        computed: {
+            bgColor() {
+                return {
+                    backgroundColor:`rgba(${this.r},${this.g},${this.b},${this.a})`
+                };
+            },
+            borderColor() {
+                return {
+                    border:'1px ' + 'solid ' + `rgba(${this.r},${this.g},${this.b},${this.a})`
+                };
+            },
+        }
+    };
+
+    let vm = new Vue({
+        el: "#app",
+        data: {
+            articles: [
+                {
+                    title: "什么是vue",
+                    content: "vue文章",
+                    author: '小明',
+                    bgc: "panel-primary"
+                },
+                {
+                    title: "什么是html",
+                    content: "html文章",
+                    author: '小小',
+                    bgc: "panel-success"
+                },
+                {
+                    title: "什么是js",
+                    content: "js文章",
+                    author: '狗蛋',
+                    bgc: "panel-info"
+                },
+                {
+                    title: "什么是react",
+                    content: "react文章",
+                    author: '小兰',
+                    bgc: "panel-warning"
+                },
+                {
+                    title: "什么是vue",
+                    content: "vue文章",
+                    author: '',
+                    bgc: "panel-danger"
+                },
+            ]
+        },
+        methods: {
+            fn(item) {
+                alert(item.author || '默认作者');
+            }
+        },
+        components: {
+            panel
+        }
+    });
+</script>
+</body>
+</html>

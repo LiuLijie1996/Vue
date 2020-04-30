@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app">
+    <input type="text" v-model="inp">
+
+    <ul>
+        <li v-for="(item,index) in shop">
+            价格: {{item['price']}}; 名称: {{item['name']}}
+        </li>
+    </ul>
+
+    <div>
+        <button @click="sortPrice(1)">价格升序</button>
+        <button @click="sortPrice(0)">价格降序</button>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    let vm = new Vue({
+        el: "#app",
+        data:{
+            inp: "",
+            arr:[
+                {
+                    name: "bijiben",
+                    price:100
+                },
+                {
+                    name: "diannao",
+                    price:66
+                },
+                {
+                    name: "youxiji",
+                    price:81
+                },
+                {
+                    name: "xianshiping",
+                    price:200
+                },
+            ]
+        },
+        methods:{
+            //价格排序
+            sortPrice(num) {
+                if (num) {
+                    this.arr.sort((a,b)=>{
+                        return a.price-b.price;
+                    })
+                }else{
+                    this.arr.sort((a,b)=>{
+                        return b.price-a.price;
+                    })
+                }
+            }
+        },
+
+        computed:{
+            //搜索
+            shop(){
+                return this.arr.filter(item=>{
+                    return item.name.includes(this.inp)
+                })
+            }
+        }
+    })
+
+
+</script>
+</body>
+</html>

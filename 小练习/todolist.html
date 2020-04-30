@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <style>
+        #app {
+            width: 1200px;
+            margin: 100px auto;
+        }
+
+        h3 {
+            padding: 20px 0;
+        }
+
+        .panel-body > ul > li {
+            list-style: none;
+            overflow: hidden;
+            font-size: 20px;
+        }
+
+        .panel-body > ul > li > button {
+            float: right;
+        }
+
+        .panel-body > ul > li > span.on {
+            color: #ccc;
+            text-decoration: line-through
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title">还有3个任务未完成</h3>
+            <div class="input-group">
+                <input
+                        type="text"
+                        class="form-control"
+                        placeholder="请输入您今天的任务"
+                        v-model="title"
+                        @keyup.enter="add"
+                >
+            </div>
+        </div>
+        <div class="panel-body">
+            <ul>
+                <li v-for="item in todolist">
+                    <input type="checkbox" v-model="item.check" :key="item.id">
+                    <input type="text" v-model="item.name" v-show="item.isShow" @blur="showHide(item)" v-focus>
+                    <span :class="{on:item.check}" @dblclick="showHide(item)" v-show="!item.isShow">{{item.name}}</span>
+                    <button
+                            class="btn btn-danger btn-xs glyphicon glyphicon-remove-circle"
+                            @click="remove(item.id)"
+                    ></button>
+                </li>
+            </ul>
+        </div>
+        <div class="panel-footer">
+            <ul class="nav nav-pills">
+                <li role="presentation" ref="span" class="all active" @click="change('all', $event)"><a
+                        href="#">所有任务</a>
+                </li>
+                <li role="presentation" class="yes" @click="change('yes', $event)"><a href="#">已完成</a></li>
+                <li role="presentation" class="no" @click="change('no', $event)"><a href="#">未完成</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    let vm = new Vue({
+        el: "#app",
+        data: {
+            title: "",
+            arr: [],
+            preEle: ''
+        },
+        directives: {
+            focus(ele) {
+                ele.focus();
+            }
+        },
+        watch: {
+            arr: {
+                handler() {
+                    //保存到本地
+                    localStorage.setItem('arr', JSON.stringify(this.arr));
+                },
+                deep: true
+            }
+        },
+        created() {
+            this.arr = JSON.parse(localStorage.getItem('arr'));
+
+            this.$nextTick(function () {
+                this.preEle = this.$refs.span;
+            })
+        },
+        filters: {},
+        methods: {
+            //添加
+            add() {
+                let update = {
+                    id: Math.floor(Math.random() * 10000000) + new Date().getTime(),
+                    check: false,
+                    isShow: false,
+                    name: this.title,
+                };
+                this.arr.push(update);
+                this.title = '';
+            },
+
+            //显示隐藏
+            showHide(item) {
+                item.isShow = !item.isShow;
+            },
+
+            //删除
+            remove(id) {
+                this.arr.forEach((item, index) => {
+                    if (item.id === id) {
+                        this.arr.splice(index, 1)
+                    }
+                })
+            },
+
+            //切换
+            change(value, e) {
+                //清除上一次元素的类名
+                this.preEle.classList.remove('active');
+
+                if (e.target.tagName === 'A') {
+                    //给父级元素加上类名
+                    e.target.parentNode.classList.add('active')
+                } else if (e.target.tagName == "LI") {
+                    //给当前元素加上类名
+                    e.target.classList.add('active')
+                }
+
+                //记录当前元素
+                this.preEle = e.target.parentNode;
+            }
+        },
+        computed: {
+            todolist() {
+                let list = [];
+
+                switch (this.preEle.className) {
+                    case 'all active':
+                        list = this.arr;
+                        break;
+                    case 'yes active':
+                        list = this.arr.filter(item => {
+                            return item.check
+                        });
+                        break;
+                    case 'no active':
+                        list = this.arr.filter(item => {
+                            return !item.check
+                        });
+                        break;
+                }
+
+                return list;
+            }
+        }
+    })
+
+
+</script>
+</body>
+</html>

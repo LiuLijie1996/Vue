@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        #app {
+            width: 800px;
+            margin: 50px auto;
+        }
+
+        .cpm {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, .5);
+        }
+
+        .cpm .panel {
+            width: 500px;
+            margin: 15% auto;
+        }
+
+        .cpm .panel button {
+            float: right;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <stuForm></stuForm>
+    <stuInfo></stuInfo>
+    <cpm></cpm>
+</div>
+
+<!-- 输入框 -->
+<template id="stuform">
+    <div>
+        <form action="javascript:;">
+            <div class="form-group">
+                <label for="exampleInputEmail1">学生姓名</label>
+                <input
+                        type="text"
+                        class="form-control"
+                        id="exampleInputEmail1"
+                        placeholder="name"
+                        v-model.trim="inpName"
+                >
+
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1">电话</label>
+                <input
+                        type="text"
+                        class="form-control"
+                        id="exampleInputPassword1"
+                        placeholder="phone"
+                        v-model.trim="inpPhone"
+                >
+            </div>
+            <button @click="addStu" type="submit" class="btn btn-default">添加</button>
+        </form>
+    </div>
+</template>
+
+<!-- 学生信息 -->
+<template id="stuinfo">
+    <div v-show="stuInfo.length">
+        <table class="table">
+            <caption class="h1 text-primary">学生信息表</caption>
+            <tr>
+                <td class="active">选择</td>
+                <td class="success">姓名</td>
+                <td class="warning">电话</td>
+                <td class="danger">删除</td>
+            </tr>
+            <tr v-for="item in stuInfo" :key="item.id">
+                <td>
+                    <input type="checkbox" v-model="stuId" :value="item.id">
+                </td>
+                <td>{{item.name}}</td>
+                <td>{{item.phone}}</td>
+                <td>
+                    <button @click="showCpm(0, item.id)" type="button"
+                            class="btn btn-danger glyphicon glyphicon-remove-circle"></button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button @click="showCpm(1)">批量删除</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</template>
+
+<!-- 弹窗 -->
+<template id="cpm">
+    <div class="cpm" v-show="isShow">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">确定要删除这 {{stuObj.stuNum}} 位学生吗</h3>
+            </div>
+            <div class="panel-body">
+                <button type="button" class="btn btn-default" @click="isShow=false">取消</button>
+                <button type="button" class="btn btn-danger" @click="remove">删除</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    let eventBus = new Vue;
+
+    let stuform = {
+        template: "#stuform",
+        data() {
+            return {
+                inpName: "",
+                inpPhone: ""
+            }
+        },
+        methods: {
+            //添加学生
+            addStu() {
+                if (this.inpName && this.inpPhone) {
+                } else {
+                    alert('输入不规范');
+                    return false;
+                }
+
+                //发送添加学生事件
+                eventBus.$emit("addStu", {
+                    check: false,
+                    id: Math.floor(Math.random() * 100000000),
+                    name: this.inpName,
+                    phone: this.inpPhone
+                });
+
+                this.inpName = '';
+                this.inpPhone = '';
+            }
+        }
+    };
+
+    let stuinfo = {
+        template: "#stuinfo",
+        data() {
+            return {
+                stuInfo: [],
+                stuId: [],//保存要删除的学生id
+            }
+        },
+        watch: {
+            stuInfo: {
+                handler() {
+                    //保存学生信息到本地
+                    localStorage.setItem("stuInfo", JSON.stringify(this.stuInfo))
+                },
+                deep: true
+            }
+        },
+        created() {
+            //订阅添加学生信息事件
+            eventBus.$on("addStu", (infoObj) => {
+                this.stuInfo.push(infoObj)
+            });
+
+            //订阅一个删除学生信息事件
+            eventBus.$on("remove", (stuObj) => {
+                if (stuObj.type === 'object') {//如果是数组,批量删除
+                    this.stuId.forEach(id => {
+                        this.stuInfo.forEach((item2, index2) => {
+                            if (id === item2.id) {
+                                this.stuInfo.splice(index2, 1)
+                            }
+                        })
+                    })
+                } else {//删除单个
+                    this.stuInfo.forEach((item, index) => {
+                        if (stuObj.id === item.id) {
+                            this.stuInfo.splice(index, 1)
+                        }
+                    });
+
+                    //判断id数组中是否包含被删除的学生,如果有,删除该id
+                    this.stuId.forEach((id,index) => {
+                        if (id === stuObj.id) {
+                            this.stuId.splice(index, 1)
+                        }
+                    })
+                }
+            });
+
+            //获取学生信息
+            this.stuInfo = JSON.parse(localStorage.getItem("stuInfo")) || [];
+            //获取被选中的学生id
+            this.stuInfo.forEach(item => {
+                if (item.check) {
+                    this.stuId.push(item.id);
+                }
+            })
+        },
+
+        methods: {
+            showCpm(bool, id) {
+                if (bool) {
+                    //发送一个显示弹窗事件
+                    eventBus.$emit("showCpm", this.stuId)
+                } else {
+                    //发送一个显示弹窗事件
+                    eventBus.$emit("showCpm", id)
+                }
+
+            }
+        }
+    };
+
+    let cpm = {
+        template: "#cpm",
+        data() {
+            return {
+                isShow: false,
+                stuObj: {}
+            }
+        },
+        created() {
+            //订阅一个显示弹窗事件
+            eventBus.$on("showCpm", (stuNum) => {
+                this.stuObj = {
+                    stuNum: typeof stuNum === 'object' ? stuNum.length : 1,
+                    type: typeof stuNum === 'object' ? 'object' : 'number',
+                    id: typeof stuNum === 'object' ? 'object' : stuNum,
+                };
+                this.isShow = true;
+            })
+        },
+        methods: {
+            //删除学生信息
+            remove() {
+                //触发删除学生事件
+                eventBus.$emit('remove', this.stuObj);
+                this.isShow = false;
+            }
+        }
+    };
+
+    let vm = new Vue({
+        el: "#app",
+        data: {},
+        components: {
+            stuform,
+            stuinfo,
+            cpm
+        }
+    })
+
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app">
+    <input type="text" v-model="inp" @keyup.enter="add">
+
+    <ul>
+        <li v-for="(item,index) in arr">
+            名称: {{item.name}} -- 年龄: {{item.age}}
+            <button @click="remove(index)">删除</button>
+            <button @click="update(index)">修改</button>
+        </li>
+    </ul>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script>
+    let vm = new Vue({
+        el: "#app",
+        data: {
+            inp: "",
+            arr: [
+                {
+                    name:'fs',
+                    age:12
+                },
+                {
+                    name:'sadf',
+                    age:13
+                },
+                {
+                    name: 'gwe',
+                    age:14
+                },
+                {
+                    name:'fewfwe',
+                    age:15
+                },
+                {
+                    name:'rgs',
+                    age:16
+                }
+            ]
+        },
+        methods: {
+            //添加
+            add() {
+                this.arr.push(this.inp);
+                this.inp = '';
+            },
+            //删除
+            remove(index) {
+                this.arr.splice(index, 1);
+            },
+            //修改
+            update(index) {
+                this.arr.splice(index, 1, {name:'小明',age:18})
+            }
+        },
+    })
+
+
+</script>
+</body>
+</html>

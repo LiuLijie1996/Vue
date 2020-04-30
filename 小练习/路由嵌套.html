@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #app {
+            width: 500px;
+            height: 500px;
+            margin: 50px auto;
+            border: 1px solid blue;
+        }
+
+        .user {
+            margin-top: 20px
+        }
+
+        .left {
+            float: left;
+            width: 50px;
+        }
+
+        .left > div {
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .router-link-exact-active {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <router-link to="/" tag="button">首页</router-link>
+    <router-link to="/user" tag="button">用户中心</router-link>
+
+    <!-- 渲染路由下的组件 -->
+    <router-view></router-view>
+</div>
+
+
+<template id="user">
+    <div class="user">
+        <div class="left">
+            <router-link :to="{name:'login'}" tag="div">登录</router-link>
+            <router-link :to="{name:'reg'}" tag="div">注册</router-link>
+        </div>
+
+        <router-view></router-view>
+    </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<script>
+    let home = {
+        template: '<div style="margin-top:20px">首页内容</div>'
+    };
+    let user = {
+        template: `#user`,
+    };
+
+    let login = {
+        template: '<div>登录页面</div>'
+    };
+    let reg = {
+        template: '<div>注册页面</div>'
+    };
+
+    //实例化路由对象
+    let router = new VueRouter({
+        routes: [
+            {
+                path: "/",
+                component: home,
+                meta: {
+                    title: "首页"
+                }
+            },
+            {
+                path: "/user",
+                component: user,
+                children: [//配置子路由
+                    {
+                        path: 'login', name: 'login', component: login,
+                        meta: {
+                            title: "登录"
+                        }
+                    },
+                    {
+                        path: 'reg', name: 'reg', component: reg,
+                        meta: {
+                            title: "注册"
+                        }
+                    },
+                ]
+            },
+        ]
+    });
+
+    let vm = new Vue({
+        el: "#app",
+        router,//注册路由
+        watch: {
+            $route() {
+                if (this.$route.path === '/user') {
+                    this.$router.push('/user/login')
+                }
+                document.title = this.$route.meta.title;
+            }
+        },
+        created(){
+            document.title = this.$route.meta.title;
+        }
+    });
+</script>
+</body>
+</html>
